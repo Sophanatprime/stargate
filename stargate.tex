@@ -1,0 +1,275 @@
+\documentclass[12pt]{article}
+\usepackage[warningsoff,address,pgf]{stargate}
+\usepackage[textwidth=18cm,textheight=24cm]{geometry}
+\usepackage{ctex}
+\usepackage{tabularray}
+\usepackage[skins,breakable,listings]{tcolorbox}
+\usepackage{hyperref}
+\hypersetup{colorlinks}
+\def\tableautorefname{表}
+
+\definecolor{examplebg}{RGB}{252, 252, 252}
+\definecolor{examplelblue}{RGB}{233, 243, 255}
+\definecolor{exampleblue}{RGB}{0, 123, 255}
+\definecolor{examplelred}{RGB}{255, 242, 242}
+\definecolor{examplered}{RGB}{220, 53, 69}
+\newcounter{example}
+\tcbset{
+  breakable,
+  example base/.style={
+    enhanced jigsaw,
+    drop fuzzy shadow southeast,
+    sharp corners,
+    boxrule=0pt,
+    fonttitle={\bfseries},
+    coltitle=black,
+    left=2mm,right=2mm,top=1mm,bottom=1mm,
+    fontupper=\normalfont,
+    colback=examplebg,
+  },
+}
+\newtcblisting[use counter=example]{example}[1][]{%
+  example base,
+  colbacktitle=examplelblue,
+  before title=例 \thetcbcounter：, title=~,
+  borderline west={1.5pt}{0pt}{exampleblue},
+  #1}
+\newtcolorbox{setting}[2][]{%
+  example base,
+  colbacktitle=examplelred,
+  borderline west={1.5pt}{0pt}{examplered},
+  title={#2},
+  #1}
+
+\providecommand{\pkg}{\textsf}
+\providecommand{\tikzlogo}{Ti\emph{k}Z}
+\providecommand{\cs}[1]{\texttt{\textbackslash#1}}
+\providecommand{\meta}[1]{$\langle$\textit{#1}$\rangle$}
+\providecommand{\opt}{\texttt}
+\providecommand{\marg}[1]{\texttt\{\meta{#1}\texttt\}}
+\providecommand{\oarg}[1]{\texttt[\meta{#1}\texttt]}
+
+\begin{document}
+
+\vspace*{1em}
+\begin{center}
+\bfseries\Huge\StargateLogo[.6]
+\end{center}
+\vspace{1em}
+
+\begin{tikzpicture}
+\StargateDHD[sgdhd origin=30,sgdhd lock=\StargateAddressOfName{DESTINY}]
+\StargateGate[sggate scale=2.3]
+\end{tikzpicture}
+
+\bigskip
+
+{\bfseries\large\pkg{星际之门}（\pkg{stargate}）元素的一种实现
+\\ \hbox{}\hfill ——使用 \tikzlogo 和 Stargate SG1 Address Glyph 字体}
+
+\hfill (雾月，Longaster \quad \today)
+
+\clearpage
+
+\begin{example}[listing side text,righthand ratio=.44,title=绘制DHD (Dial Home Device)]
+Dial The Gate! 
+
+FROM (从)(CHULAK): \StargateAddressByName{CHULAK}
+
+Point Of Origin (起点): \StargateGlyph{7}
+
+\tikz\StargateDHD[
+  sgdhd origin=7,
+  sgdhd lock={\StargateAddressOfName{EARTH}},
+];
+
+TO (到)(EARTH): \StargateAddressByName{EARTH}
+\end{example}
+
+\begin{example}[title=绘制星际之门]
+绘制星际之门：\tikz[baseline]\StargateGate;
+\end{example}
+
+在加载 \pkg{stargate} 宏包时使用 \opt{pgf} 选项将加载 \pkg{tikz} 宏包，并定义这两个命令。
+
+Logo: \cs{StargateLogo}\oarg{width}，这个可选参数控制外侧线宽。
+
+\verb|\StargateLogo[0.25]|\StargateLogo[0.25]。
+
+\begin{example}[title=星门字形,listing side text,lefthand ratio=.6]
+可通过 \verb|\StargateGlyph| 选择字形：
+\Huge \StargateGlyph{1}\StargateGlyph{2}
+\StargateGlyph{39}\StargateGlyph{40} \\
+\StargateGlyph{Earth}\StargateGlyph{Crater}
+\StargateGlyph{Leo}\StargateGlyph{Abydos} 
+\end{example}
+
+可用的字形参考\autoref{tab:glyph}，可以使用名称或数字。
+
+\makeatletter
+\stargate@tmpctn=0
+\def\TMP{}
+\def\tmp@addto#1#2{
+  \advance\stargate@tmpctn by 1
+  \g@addto@macro\TMP{%
+    {\begin{tabular}{cc}
+      \Huge\StargateGlyph{#1}\\
+      \small #1/#2\end{tabular}}}
+  \ifnum\stargate@tmpctn=5
+    \g@addto@macro\TMP{ \\ }
+    \stargate@tmpctn=0
+  \else\g@addto@macro\TMP{ & }
+  \fi}
+\stargate@zip@\stargate@glyph@list\stargate@glyph@num\tmp@addto
+\makeatother
+\begin{table}[!ht]
+\caption{可用的字形（Stargate Glyph）}\label{tab:glyph}\vspace{8pt}
+\begin{tblr}[expand=\TMP]{
+  colspec={*{5}{|X[c]}|},hlines,
+  rows={abovesep+=5pt},columns={colsep=-5pt},
+}
+\TMP 
+\end{tblr}
+
+\begin{tblr}{colspec={|c|c|X[c]|X[c]|X[c]|c|},hlines}
+原义 & Scorpio/9 & Cra/10 & Mic/14 & Capricorn/15 & PiscesAustrinus/16 \\
+同义 & Scorpius & CoronaAustralis & Microscopium & Capricornus & PiscisAustrinus
+\end{tblr}
+\end{table}
+
+你可以通过 \cs{StargateGlyphName}\marg{integer} 来获得字形的名称，它是可扩展的。
+
+“同义”指这两个词的作用完全相同，你可以使用 \cs{stargatesetalian}\marg{alian}\marg{origin} 来设置自己的同义词。
+
+也支持使用 \cs{StargaetGlyph}\meta{name} 来引用：
+\begin{example}[]
+\Huge \StargateGlyphEarth \StargateGlyphCrater \StargateGlyphLeo \StargateGlyphAbydos
+\end{example}
+
+可以使用 \verb|\stargate| 和 \verb|\stargatefamily|，它们类似 \cs{texttt} 和 \cs{ttfamily}。可用的符号为 \verb|A-Z| 和 \verb|a-n|，依次代表了40个可用的字形。
+\begin{example}[]
+\stargate{ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmn}
+\end{example}
+
+定义了18个起点（16个有效），可以通过 \cs{StargateOrigin} 引用，全部的18个起点见\autoref{tab:origin}。
+
+你可以通过 \cs{StargatePointName}\marg{integer} 来获得起点的名称，它是可扩展的。
+
+\begin{example}[title=起点,listing side text,lefthand ratio=.6]
+\Huge \StargateOrigin{1}\StargateOrigin{2}
+\StargateOrigin{17}\StargateOrigin{18} \\
+\StargateOrigin{Earth}\StargateOrigin{Abydos}
+\StargateOrigin{Tagrea}\StargateOrigin{P4M-328}
+\end{example}
+
+\makeatletter
+\def\TMP{}
+\stargate@tmpctn=0
+\def\tmp@addto#1#2{
+  \advance\stargate@tmpctn by 1
+  \g@addto@macro\TMP{%
+    {\begin{tabular}{cc}
+      \Huge\StargateOrigin{#1}\\
+      \small \detokenize{#1}/#2\end{tabular}}}
+  \ifnum\stargate@tmpctn=5
+    \g@addto@macro\TMP{ \\ }
+    \stargate@tmpctn=0
+  \else\g@addto@macro\TMP{ & }
+  \fi}
+\stargate@zip@\stargate@origin@point\stargate@origin@num\tmp@addto
+\makeatother
+\begin{table}[!ht]
+\caption{可用的起点（Point of Origin）}\label{tab:origin}\vspace{8pt}
+\begin{tblr}[expand=\TMP]{
+  colspec={*{5}{|X[c]}|},hlines,
+  rows={abovesep+=5pt},columns={colsep=-5pt},
+}
+\TMP 
+\end{tblr}
+\end{table}
+
+可以使用列表或地址名来输出地址：
+\begin{example}[listing side text,lefthand ratio=.6,title=输出地址]
+\Huge \StargateAddress{9,18,27,15,21,36} \\
+\StargateAddressByName{FINAL DESTINATION}
+\end{example}
+
+也可以使用 \cs{StargateAddAddress}\marg{name}\marg{address list} 来定义新的地址，新的名称将覆盖旧的。
+
+你可以使用 \cs{StargateAddressOfName}\marg{address name} 获得对应的地址，它是可扩展的。
+
+在加载 \pkg{stargate} 宏包时使用 \opt{address} 选项，将预定义一些已有的地址，这些地址见\autoref{tab:address}。
+
+\ExplSyntaxOn
+\def\TMP{}
+\char_set_catcode_alignment:N \&
+\prop_map_inline:Nn \g__stargate_address_prop
+  {\tl_put_right:Nn \TMP 
+    {\texttt{#1} & #2 & \LARGE\StargateAddressByName{#1} \\ }}
+\ExplSyntaxOff
+\DefTblrTemplate{contfoot-text}{default}{\tiny （接下页）}
+\DefTblrTemplate{conthead-text}{default}{\tiny （接上页）}
+\begin{longtblr}[
+  caption=预定义的地址（Address）,label=tab:address,expand=\TMP,
+]{colspec={|c|c|c|},hlines,hline{1,2,Z}={1pt},vlines={1pt},rowhead=1}
+名称 & 地址列表 & 地址 \\
+\TMP
+\end{longtblr}
+
+\opt{pgf} 宏包选项定义了 \cs{StargateGate} 和 \cs{StargateDHD} 命令，用于绘制星际之门和DHD，必须用在 \tikzlogo 环境中。
+\cs{StargateGate} 和 \cs{StargateDHD} 可用的设置：
+\begin{setting}{可用设置}
+{\obeylines
+星门：
+\verb|/tikz/sggate center point=|\marg{coordinate}
+\verb|/tikz/sggate scale=|\marg{integer}
+\verb|/tikz/sggate node glyph/.append style=|\marg{tikz options}
+\verb|(sg Gate Center)|、\verb|(sg Gate Glyph-1)|、\verb|...|、\verb|(sg Gate Glyph-39)| 坐标点
+DHD：
+\verb|/tikz/sgdhd center point=|\marg{coordinate}
+\verb|/tikz/sgdhd scale=|\marg{integer}
+\verb|/tikz/sgdhd glyph/.append style=|\marg{tikz options}
+\verb|/tikz/sgdhd origin=|\marg{integer}，设置起点，范围为1-40
+\verb|/tikz/sgdhd origin by name=|\marg{name}，通过名称设置起点，不能是同义
+\verb|/tikz/sgdhd button base/.append style=|\marg{tikz options}，设置中心按钮底座样式
+\verb|/tikz/sgdhd button/.append style=|\marg{tikz options}，设置中心按钮样式
+\verb|/tikz/sgdhd button color=|\marg{color expr}
+\verb|/tikz/sgdhd button glyph/.append style=|\marg{tikz options}
+\verb|/tikz/sgdhd base/.append style=|\marg{tikz options}，设置地盘样式
+\verb|/tikz/sgdhd base base/.append style=|\marg{tikz options}，设置底盘背景样式
+\verb|/tikz/sgdhd locked color=|\marg{color expr}，设置锁定的按钮的颜色
+\verb|/tikz/sgdhd lock=|\marg{address list}，设置要锁定的按钮1-39，小的在外侧，大的在内侧，以通过 \cs{StargateAddressOfName} 来通过名字引用。由于 Abydos(40) 在《星际之门》影视作品中从未作为可输入的地址，因此，这里不支持使用它
+\verb|/tikz/sgdhd lock*=|\marg{address list}\marg{tikz options}
+\verb|/tikz/sgdhd inner button 1/.append style=|\marg{tikz options}
+\verb|...|
+\verb|/tikz/sgdhd inner button 18/.append style=|\marg{tikz options}
+\verb|/tikz/sgdhd outer button 1/.append style=|\marg{tikz options}
+\verb|...|
+\verb|/tikz/sgdhd outer button 18/.append style=|\marg{tikz options}
+\verb|(sg DHD Center)| 坐标点
+}
+\end{setting}
+
+《星际之门》（\textit{STARGATE}）由米高梅和Scifi出品，影视作品系列包含：
+\begin{itemize}
+  \item 1994年的同名电影；
+  \item 1997年-2007年的电视剧 Stargate: SG-1，10季，共216集，每集大约44分钟；
+  \item 2004年-2009年的电视剧 Stargate: Atlantis（SGA，星际之门：亚特兰蒂斯），5季，共100集（未完），每集大约44分钟；
+  \item 2009年-2011年的电视剧 Stargate: Universe（SGU，星际之门：宇宙），2季，共40集（未完），每集大约43分钟；
+  \item 2008年的两部电影 Stargate: The Ark of Truth（星际之门：真理之箱），97分钟，Stargate: Continuum（星际之门：时空连续），93分钟。
+  \item 以及2018年的网剧 Stargate Origins（星际之门：起源），共10集。
+\end{itemize}
+
+电影和电视剧皆为续作，SG-1和SGA有交叉。总的来说不输于《星际迷航》系列。对于科幻迷来说是一部不得不看的好剧（前提是能看完17季 + 3部电影）。
+
+已经近10年没有正剧了，听说今年有活动，期待《星际之门》归来！
+
+《星际之门》的更多信息请看：\url{https://stargate.fandom.com/wiki/Stargate_Wiki}。
+
+影视作品中出现的星门地址请参考：
+\url{https://stargate.fandom.com/wiki/Glyph}, \\
+\url{https://www.rdanderson.com/stargate/glyphs/index.htm}, \\
+\url{https://thestargateproject.com/address-book/},
+\pkg{stargate} 宏包已全部包含。
+
+\end{document}

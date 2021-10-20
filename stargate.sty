@@ -1,0 +1,257 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{stargate}[2021/10/19 v1.0 Stargate Symbols]
+\RequirePackage{fontspec}
+
+% \StargateGlyph{<glyph name OR integer(1-40)>}
+% \StargateGlyphName{<integer(1-40)>} expandable
+% \StargateOrigin{<point of origin OR integer(1-18)>}
+% \StargateOriginName{<integer(1-18)>} expandable
+% \StargateAddAdress{<address name>}{<address>}
+% \StargateAddressOfName{<address name>} expandable
+% \StargateAddress{<address>}
+% \StargateAddressByName{<address name>}
+%% address see: https://stargate.fandom.com/wiki/Glyph,
+%%              https://www.rdanderson.com/stargate/glyphs/index.htm,
+%%              https://thestargateproject.com/address-book/,
+%%% address options:
+%% define many address
+%%% pgf options:
+%% \StargateGate[<sggate options>]
+%% \StargateDHD[<sgdhd options>]
+
+\ExplSyntaxOn
+\prg_new_conditional:Npnn \__stargate_tl_if_either_empty_ii:nn #1 #2 {p,T,F,TF} 
+  {
+    \tl_if_empty:nTF {#1} {\prg_return_true:} 
+      { \tl_if_empty:nTF {#2} {\prg_return_true:} {\prg_return_false:} }
+  }
+\cs_new:Npn \stargate_clist_zip:nnN #1 #2 #3 
+  { \stargate_clist_zip_aux:Nnw #3 {} #1, \q_mark, #2, \q_mark. }
+\cs_new:Npn \stargate_clist_zip_aux:Nnw #1 #2 #3, #4 \q_mark, #5, #6 \q_mark. 
+  {
+    \__stargate_tl_if_either_empty_ii:nnTF {#4} {#6} 
+      { #2 #1{#3}{#5} }
+      { \stargate_clist_zip_aux:Nnw #1 {#2 #1{#3}{#5}} #4 \q_mark, #6 \q_mark. }
+  }
+\cs_generate_variant:Nn \stargate_clist_zip:nnN { oo, VV }
+\cs_set_eq:NN \stargate@zip \stargate_clist_zip:nnN
+\cs_set_eq:NN \stargate@zip@ \stargate_clist_zip:ooN
+\cs_set_eq:NN \stargate@item \clist_item:Nn
+\cs_generate_variant:Nn \clist_map_inline:nn { xn }
+\cs_set_eq:NN \stargate@map \clist_map_inline:xn
+\cs_set_eq:NN \stargate@map@ \clist_map_inline:Nn
+\cs_generate_variant:Nn \clist_map_function:nN { xN }
+\cs_set_eq:NN \stargate@mapfunc \clist_map_function:xN
+\cs_generate_variant:Nn \clist_map_variable:nNn { xNn }
+\cs_set_eq:NN \stargate@mapvar \clist_map_variable:xNn
+\cs_set_eq:NN \stargate@namedef \cs_set_nopar:Npn
+\cs_set_eq:NN \stargate@namelet \cs_set_eq:cc
+\prop_new:N \g__stargate_address_prop
+\cs_set_protected_nopar:Npn \StargateAddAddress { \prop_put:Nxx \g__stargate_address_prop }
+\cs_set_nopar:Npn \StargateAddressOfName { \prop_item:Nn \g__stargate_address_prop }
+\cs_set_nopar:Npn \stargate@find@index@to #1#2#3
+  {
+    \stargate@tmpctn=1
+    \clist_map_inline:Nn #1
+      {
+        \str_if_eq:eeTF {##1} {#2}
+          { \edef#3{\the\stargate@tmpctn} \clist_map_break: }
+          { \advance\stargate@tmpctn by 1 }
+      }
+    \ifnum\clist_count:N #1<\stargate@tmpctn\def#3{0}\fi
+  }
+\ExplSyntaxOff
+
+\def\stargate@logo#1#2{\special{pdf:code q 2 Tr #1 w [] 0 d 1 J 1 1 1 rg}#2\special{pdf:code Q}}
+\DeclareRobustCommand\StargateLogo[1][0.25]{\phantom{!}\stargate@logo{#1}{S\,T\,A\,R\,G}\stargate{A}\stargate@logo{#1}{T\,E}}
+
+\newfontfamily\stargatefamily{Stargate SG1 Address Glyphs}
+%  [BoldFont=*,ItalicFont=*,BoldItalicFont=*,SlantedFont=*,SmallCapsFont=*,UprightFont=*]
+\DeclareTextFontCommand{\stargate}{\stargatefamily}
+
+\def\stargate@glyph@list{Earth,Crater,Virgo,Bootes,Centaurus,Libra,SerpensCaput,Norma,%
+  Scorpio,Cra,Scutum,Sagittarius,Aquila,Mic,Capricorn,PiscesAustrinus,Equuleus,Aquarius,%
+  Pegasus,Sculptor,Pisces,Andromeda,Triangulum,Aries,Perseus,Cetus,Taurus,Auriga,Eridanus,%
+  Orion,CanisMinor,Monoceros,Gemini,Hydra,Lynx,Cancer,Sextans,LeoMinor,Leo,Abydos}
+\def\stargate@glyph@num{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,?}
+\def\stargate@alphbet@num{65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,%
+  83,84,85,86,87,88,89,90,97,98,99,100,101,102,103,104,105,106,107,108,109,110,96}
+\def\stargate@glyph@gene#1#2{\@namedef{StargateGlyph#1}{{\stargatefamily\symbol{#2}}}}
+\stargate@zip@\stargate@glyph@list\stargate@alphbet@num\stargate@glyph@gene
+\stargate@zip@\stargate@glyph@num\stargate@alphbet@num\stargate@glyph@gene
+\def\StargateGlyph#1{\@nameuse{StargateGlyph#1}}
+\def\StargateGlyphName{\stargate@item\stargate@glyph@list}
+
+\def\stargatesetalian#1#2{\stargate@namelet{StargateGlyph#1}{StargateGlyph#2}}
+\stargate@zip{Scorpius,CoronaAustralis,Microscopium,Capricornus,PiscisAustrinus,}
+  {Scorpio,Cra,Mic,Capricorn,PiscesAustrinus,}{\stargatesetalian}
+
+\def\stargate@origin@point{Earth,Abydos,Chulak,P3X-562,Tollan,BetaSite,P3R-233,Ha'tak,P7J-989,%
+  Tok'ra,p34-353J,Medieval,Rendezvous,P2X-416,P7S-441,Pangar,Tagrea,P4M-328}
+\def\stargate@origin@num{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18}
+\def\stargate@origin@glyph@num{1,40,7,14,2,?,21,24,?,11,37,15,23,25,29,18,25,33}
+\def\stargate@origin@gene#1#2{\@namedef{StargateOrigin#1}{\StargateGlyph{#2}}}
+\stargate@zip@\stargate@origin@point\stargate@origin@glyph@num\stargate@origin@gene
+\stargate@zip@\stargate@origin@num\stargate@origin@glyph@num\stargate@origin@gene
+\def\StargateOrigin#1{\@nameuse{StargateOrigin#1}}
+\def\StargateOriginName{\stargate@item\stargate@origin@point}
+\def\StargateAddress#1{\stargate@mapfunc{#1}\StargateGlyph}
+\def\StargateAddressByName#1{\StargateAddress{\StargateAddressOfName{#1}}}
+
+\newif\ifstargate@pgf
+\newif\ifstargate@address
+\DeclareOption{pgf}{\stargate@pgftrue}
+\DeclareOption{address}{\stargate@addresstrue}
+\DeclareOption{warningsoff}{
+  \renewfontfamily\stargatefamily{Stargate SG1 Address Glyphs}[
+    BoldFont=*,ItalicFont=*,BoldItalicFont=*,SlantedFont=*,SmallCapsFont=*,UprightFont=*]}
+\ProcessOptions\relax
+
+\ifstargate@address
+\StargateAddAddress{ABYDOS}{27,7,15,32,12,30}
+\StargateAddAddress{APOPHIS BASE}{20,18,11,38,10,32}
+\StargateAddAddress{CASTIANA and SAHAL}{29,3,6,9,12,16}
+\StargateAddAddress{CASTIANA and SAHAL alt}{29,18,19,20,21,22}
+\StargateAddAddress{CHULAK}{9,2,23,15,37,20}
+\StargateAddAddress{CLAVA THESSARA INFINITAS}{14,21,16,11,30,7}
+\StargateAddAddress{CLAVA THESSARA INFINITAS alt}{26,20,35,32,23,4}
+\StargateAddAddress{DESTROYERS}{3,32,16,8,10,12}
+\StargateAddAddress{EARTH}{28,26,5,36,11,29}
+\StargateAddAddress{EDORA}{28,38,35,9,15,3}
+\StargateAddAddress{EURONDA}{30,27,9,7,18,16}
+\StargateAddAddress{JUNA}{6,16,8,3,26,25}
+\StargateAddAddress{KEHB}{26,35,6,8,23,14}
+\StargateAddAddress{K TAU}{18,2,30,12,26,33}
+\StargateAddAddress{LAND OF LIGHT}{26,2,?,38,10,32}
+\StargateAddAddress{MARTIN LLOYD HOMEWORLD}{24,12,32,7,11,34}
+\StargateAddAddress{NID OFF,WORLD BASE}{38,28,15,35,3,19}
+\StargateAddAddress{OTHALA}{11,27,23,16,33,3,9}
+\StargateAddAddress{P2X-555}{28,8,16,33,13,31}
+\StargateAddAddress{P34-353J}{38,9,28,15,35,3}
+\StargateAddAddress{P3W-451}{19,8,4,37,26,16}
+\StargateAddAddress{P3X-118}{9,26,34,37,17,21}
+\StargateAddAddress{P3X-526}{3,28,9,35,24,15}
+\StargateAddAddress{P3X-984}{29,5,36,23,?}
+\StargateAddAddress{P9C-372}{25,8,18,29,4,22}
+\StargateAddAddress{PB5-926}{12,36,23,18,7,27}
+\StargateAddAddress{PX1-767}{20,2,35,8,26,15}
+\StargateAddAddress{PRACLARSH TAONAS}{35,3,31,29,5,17}
+\StargateAddAddress{SANGREAL PLANET}{30,19,34,9,33,18}
+\StargateAddAddress{TARTARUS}{33,28,23,26,16,31}
+\StargateAddAddress{TOLLAN}{6,33,27,37,11,18}
+\StargateAddAddress{TOLLANA}{4,29,8,22,18,25}
+\StargateAddAddress{VAGON BREI}{3,8,2,12,19,30}
+\StargateAddAddress{FINAL DESTINATION}{9,18,27,15,21,36}
+\StargateAddAddress{UNNAMED PLANET}{9,18,27,15,21,36}
+\StargateAddAddress{LANTIA}{19,21,2,16,15,8,20}
+\StargateAddAddress{DESTINY}{6,17,21,31,35,24,5,14}
+\fi
+
+\ifstargate@pgf
+\newcount\stargate@tmpctn
+\RequirePackage{tikz}
+\usetikzlibrary{decorations.markings,calc}
+\tikzset{
+  sggate scale/.style={scale=#1,sggate node glyph/.append style={scale=#1}},
+  sggate node glyph/.style={},
+  sggate center point/.code={\coordinate (sg Gate Center) at #1;},
+}
+\newcommand\StargateGate[1][]{
+\coordinate (sg Gate Center) at (0,0);
+\tikzset{#1}
+\draw[thick] (sg Gate Center)circle(3.4cm) (sg Gate Center)circle(3cm);
+\foreach \i in {1,...,39} \coordinate (sg Gate Glyph-\i) at ([shift=(sg Gate Center)]$({90-(\i-1)*9.23}:3.18cm)$);
+\foreach \i in {1,...,20}
+  \node[transform canvas={shift=(sg Gate Center)},at=({90-(\i-1)*9.23}:3.2),rotate={(1-\i)*9.23},sggate node glyph]{\StargateGlyph{\i}};
+\foreach \i in {39,37,35,34,...,21}
+  \node[transform canvas={shift=(sg Gate Center)},at=({90-(\i-1)*9.23}:3.2),rotate=-100,sggate node glyph]{\StargateGlyph{\i}};
+\node[transform canvas={shift=(sg Gate Center)},at=(-251.51:3.2),rotate=190,sggate node glyph]{\StargateGlyph{38}};
+\node[transform canvas={shift=(sg Gate Center)},at=(-233.05:3.2),rotate=45,sggate node glyph]{\StargateGlyph{36}};
+\foreach \i in {-90,-80.77,...,270} \draw[shift=(sg Gate Center)] (\i:3cm)--(\i:3.4cm);
+\draw[line width=2pt,gray!30] (sg Gate Center) circle (2.9cm);
+\draw[line width=1pt] (sg Gate Center) circle (2.88cm);
+\draw (sg Gate Center) circle (3.5cm);
+\begin{scope}[shift=(sg Gate Center)]
+\foreach \i in {-90,-80.77,...,270} {
+  \draw (\i:3.4cm)--(\i:3.5cm)--({\i+3.0766}:3.4cm)--({\i+3.0766}:3.5cm)--({\i+6.1533}:3.4cm)--({\i+6.1533}:3.5cm)--({\i+9.23}:3.4cm);
+  \draw (\i:3.4cm)--({\i+3.0766}:3.5cm)--({\i+3.0766}:3.4cm)--({\i+6.1533}:3.5cm)--({\i+6.1533}:3.4cm)--({\i+9.23}:3.5cm);
+}
+\end{scope}
+}
+\colorlet{sgdhdlockedcolor}{blue!40}
+\def\stargate@dhd@calc@posi#1{
+  \ifnum\pgfkeysvalueof{/tikz/sgdhd origin point}>#1
+    \ifnum#1<20\def\stargate@dhd@posi{sgdhd outer button #1}
+    \else\edef\stargate@dhd@posi{sgdhd inner button \the\numexpr#1-19}\fi
+  \else\ifnum#1<21
+      \edef\stargate@dhd@posi{sgdhd outer button \the\numexpr#1-1}
+    \else\edef\stargate@dhd@posi{sgdhd inner button \the\numexpr#1-20}\fi
+  \fi}
+\def\stargate@put@glyph@with#1{
+  \ifnum\pgfkeysvalueof{/tikz/sgdhd origin point}>#1\StargateGlyph{#1}
+  \else\ifnum\pgfkeysvalueof{/tikz/sgdhd origin point}=#1
+    \StargateGlyph{\the\numexpr#1+1}
+    \else\StargateGlyph{\the\numexpr#1+1}\fi
+  \fi}
+\pgfkeyssetvalue{/tikz/sgdhd origin point}{1}
+\tikzset{
+  sgdhd glyph/.style={},
+  sgdhd scale/.style={
+    scale=#1,sgdhd glyph/.append style={scale=#1},
+    sgdhd button glyph/.append style={scale=#1},
+  },
+  sgdhd center point/.code={\coordinate (sg DHD Center) at #1;},
+  sgdhd origin/.code={\pgfkeyssetvalue{/tikz/sgdhd origin point}{#1}},
+  sgdhd origin by name/.code={
+    \stargate@find@index@to\stargate@glyph@list{#1}\stargate@tmpi
+    \ifnum\stargate@tmpi=0\pgfkeyssetvalue{/tikz/sgdhd origin point}{40}
+    \else\pgfkeyssetevalue{/tikz/sgdhd origin point}{\stargate@tmpi}
+    \fi
+  },
+  sgdhd button glyph/.style={},
+  sgdhd button base/.style={fill=black!60},
+  sgdhd button/.style={fill=orange},
+  sgdhd button color/.code={
+    \tikzset{sgdhd button/.append style={fill=#1}}},
+  sgdhd base/.style={fill=gray!50},
+  sgdhd base color/.code={
+    \tikzset{sgdhd base/.append style={fill=#1}}},
+  sgdhd base base/.style={fill=black!60},
+  sgdhd locked color/.code={\colorlet{sgdhdlockedcolor}{#1}},
+  sgdhd lock/.code={
+    \stargate@mapvar{#1}\stargate@tmpi{
+      \stargate@dhd@calc@posi\stargate@tmpi
+      \tikzset{\stargate@dhd@posi/.append style={fill=sgdhdlockedcolor}}
+    }},
+  sgdhd lock*/.code 2 args={
+    \stargate@mapvar{#1}\stargate@tmpi{
+      \stargate@dhd@calc@posi\stargate@tmpi
+      \tikzset{\stargate@dhd@posi/.append style={#2}}}},
+}
+\csname int_step_variable:nNn\endcsname{19}\i{
+  \tikzset{sgdhd inner button \i/.style={fill=white},
+    sgdhd outer button \i/.style={fill=white},}
+}
+\newcommand\StargateDHD[1][]{
+\coordinate (sg DHD Center) at (0,0);
+\tikzset{#1}
+\draw[sgdhd base base] (sg DHD Center) circle (3.53cm);
+\draw[sgdhd base] (sg DHD Center) circle (3.4cm);
+\draw[sgdhd button base] (sg DHD Center) circle (1.1cm);
+\draw[sgdhd button] (sg DHD Center) circle (1cm) node[sgdhd button glyph,font=\Huge]{\StargateGlyph{\pgfkeysvalueof{/tikz/sgdhd origin point}}};
+\begin{scope}[transform canvas={shift=(sg DHD Center)}]
+\global\stargate@tmpctn=0
+\foreach \i in {-99.4735,-80.5265,...,260}
+  {
+    \global\advance\stargate@tmpctn by 1
+    \draw[sgdhd outer button \the\stargate@tmpctn] ({\i+1.5735}:2.3cm)arc({\i+1.5735}:{\i+17.3735}:2.3cm)--({\i+17.3735}:3.25cm)arc({\i+17.3735}:{\i+1.5735}:3.25cm)--cycle;
+    \draw[sgdhd inner button \the\stargate@tmpctn] ({\i+1.5735}:1.3cm)arc({\i+1.5735}:{\i+17.3735}:1.3cm)--({\i+17.3735}:2.1cm)arc({\i+17.3735}:{\i+1.5735}:2.1cm)--cycle;
+  }
+\foreach \i in {1,...,19}
+  \node[font=\LARGE,rotate={(\i-1)*18.947},sgdhd glyph] at ({-108.947+\i*18.947}:2.75cm) {\stargate@put@glyph@with\i};
+\foreach \i in {20,...,38}
+  \node[font=\large,rotate={(\i-1)*15.947},sgdhd glyph] at ({-108.947+\i*18.947}:1.7cm) {\stargate@put@glyph@with\i};
+\end{scope}
+}
+
+\fi
